@@ -11,19 +11,19 @@ import TestPanelCard from "@/components/TestPanelCard";
 import AbnormalFindings from "@/components/AbnormalFindings";
 import AdviceSection from "@/components/AdviceSection";
 import PrivacyBadges from "@/components/PrivacyBadges";
-import AIAvatarGuide from "@/components/AIAvatarGuide";
+import HolographicAvatar from "@/components/HolographicAvatar";
 
 const stagger = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
-    transition: { staggerChildren: 0.12 },
+    transition: { staggerChildren: 0.1 },
   },
 };
 
 const fadeUp = {
-  hidden: { opacity: 0, y: 24 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: "easeOut" as const } },
 };
 
 const Results = () => {
@@ -81,17 +81,17 @@ const Results = () => {
         </div>
       </header>
 
-      <main className="container max-w-7xl mx-auto px-4 py-8">
+      <main className="container max-w-7xl mx-auto px-4 py-6">
         {/* Back + Title */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between mb-6"
+          className="flex items-center justify-between mb-5"
         >
           <div>
             <button
               onClick={() => navigate("/")}
-              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-2 group"
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-1.5 group"
             >
               <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back
             </button>
@@ -112,10 +112,10 @@ const Results = () => {
         </motion.div>
 
         {/* Two-column layout: Avatar left + Content right */}
-        <div className="flex gap-6">
+        <div className="flex gap-5">
           {/* Left Column - AI Avatar (hidden on mobile) */}
           <div className="hidden lg:block w-72 flex-shrink-0">
-            <AIAvatarGuide results={results} />
+            <HolographicAvatar results={results} />
           </div>
 
           {/* Right Column - Main Content */}
@@ -123,11 +123,11 @@ const Results = () => {
             variants={stagger}
             initial="hidden"
             animate="show"
-            className="flex-1 min-w-0 space-y-6"
+            className="flex-1 min-w-0 space-y-5"
           >
             {/* Mobile Avatar */}
             <div className="lg:hidden">
-              <AIAvatarGuide results={results} />
+              <HolographicAvatar results={results} />
             </div>
 
             {/* Disclaimer */}
@@ -136,7 +136,7 @@ const Results = () => {
             </motion.div>
 
             {/* Score + Summary Row */}
-            <motion.div variants={fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <motion.div variants={fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <HealthScoreCard
                 score={results.healthScore}
                 grade={results.healthGrade}
@@ -153,13 +153,13 @@ const Results = () => {
               />
             </motion.div>
 
-            {/* Test Panels */}
+            {/* Test Panels — 2-column grid */}
             <motion.div variants={fadeUp}>
-              <h2 className="font-display text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
-                <span className="w-1 h-6 rounded-full hero-gradient inline-block" />
+              <h2 className="font-display text-lg font-semibold text-foreground mb-3 flex items-center gap-2">
+                <span className="w-1 h-5 rounded-full hero-gradient inline-block" />
                 Test Panels Detected
               </h2>
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {results.panels.map((panel, i) => (
                   <TestPanelCard key={panel.name} panel={panel} index={i} />
                 ))}
@@ -171,7 +171,7 @@ const Results = () => {
               <AbnormalFindings findings={results.abnormalFindings} />
             </motion.div>
 
-            {/* Advice Sections */}
+            {/* Advice Sections — already uses 2-col grid internally */}
             <motion.div variants={fadeUp}>
               <AdviceSection
                 practicalAdvice={results.practicalAdvice}
@@ -181,20 +181,23 @@ const Results = () => {
               />
             </motion.div>
 
-            {/* Privacy */}
-            <motion.div variants={fadeUp}>
-              <PrivacyBadges />
-            </motion.div>
-
-            {/* Analyze Another */}
-            <motion.div variants={fadeUp} className="panel-card p-8 text-center shimmer">
-              <h3 className="font-display text-lg font-semibold text-foreground mb-2">Lab Report Analysis</h3>
-              <p className="text-sm text-muted-foreground mb-4">
-                Want to analyze another report? Upload a new lab report to get instant AI-powered insights.
-              </p>
-              <Button onClick={() => navigate("/")} className="shadow-hero hover:shadow-glow transition-shadow">
-                Analyze Another Report
-              </Button>
+            {/* Privacy + CTA Row */}
+            <motion.div variants={fadeUp} className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="md:col-span-2">
+                <PrivacyBadges />
+              </div>
+              <motion.div
+                whileHover={{ y: -2, transition: { duration: 0.2 } }}
+                className="panel-card p-6 flex flex-col items-center justify-center text-center shimmer"
+              >
+                <h3 className="font-display text-base font-semibold text-foreground mb-2">Analyze Another</h3>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Upload a new lab report for instant AI insights.
+                </p>
+                <Button onClick={() => navigate("/")} size="sm" className="shadow-hero hover:shadow-glow transition-shadow">
+                  New Report
+                </Button>
+              </motion.div>
             </motion.div>
           </motion.div>
         </div>

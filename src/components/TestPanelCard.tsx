@@ -60,6 +60,7 @@ const TestPanelCard = ({ panel, index }: TestPanelCardProps) => {
         transition: { duration: 0.2 },
       }}
       className="panel-card overflow-hidden card-3d"
+      data-panel-card
     >
       <button
         onClick={() => setExpanded(!expanded)}

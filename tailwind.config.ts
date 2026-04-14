@@ -56,6 +56,11 @@ export default {
         "status-critical": "hsl(var(--status-critical))",
         "status-slightly-low": "hsl(var(--status-slightly-low))",
         "status-slightly-high": "hsl(var(--status-slightly-high))",
+        holo: {
+          DEFAULT: "hsl(var(--holo-primary))",
+          secondary: "hsl(var(--holo-secondary))",
+          accent: "hsl(var(--holo-accent))",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

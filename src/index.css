@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
 @layer base {
   :root {
@@ -46,6 +46,14 @@
     --shadow-hero: 0 8px 32px hsl(185 75% 55% / 0.25);
     --shadow-glow: 0 0 40px hsl(185 75% 55% / 0.2);
     --shadow-elevated: 0 20px 60px hsl(0 0% 0% / 0.4), 0 4px 16px hsl(0 0% 0% / 0.2);
+
+    /* Hologram tokens */
+    --holo-primary: 185 85% 60%;
+    --holo-secondary: 195 90% 50%;
+    --holo-accent: 160 70% 55%;
+    --holo-glow: 0 0 30px hsl(185 85% 60% / 0.4), 0 0 60px hsl(185 85% 60% / 0.2), 0 0 120px hsl(185 85% 60% / 0.1);
+    --holo-scanline-color: hsl(185 85% 70% / 0.06);
+    --holo-flicker-opacity: 0.92;
 
     --sidebar-background: 220 25% 10%;
     --sidebar-foreground: 210 20% 92%;
@@ -263,3 +271,158 @@
 .status-glow-normal { animation: status-pulse-normal 4s ease-in-out infinite; }
 .status-glow-critical { animation: status-pulse-critical 2s ease-in-out infinite; }
 .status-glow-attention { animation: status-pulse-attention 3s ease-in-out infinite; }
+
+/* ===== Holographic Avatar System ===== */
+
+@keyframes holo-scanlines {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100%; }
+}
+
+@keyframes holo-flicker {
+  0%, 100% { opacity: var(--holo-flicker-opacity); }
+  5% { opacity: 0.85; }
+  10% { opacity: var(--holo-flicker-opacity); }
+  42% { opacity: 0.88; }
+  44% { opacity: var(--holo-flicker-opacity); }
+  70% { opacity: 0.9; }
+  72% { opacity: 0.86; }
+  74% { opacity: var(--holo-flicker-opacity); }
+}
+
+@keyframes holo-breathe {
+  0%, 100% { transform: translateY(0) scale(1); filter: brightness(1); }
+  50% { transform: translateY(-6px) scale(1.01); filter: brightness(1.08); }
+}
+
+@keyframes holo-project-in {
+  0% { transform: scaleY(0.02) scaleX(0.6); opacity: 0; filter: brightness(3) blur(8px); }
+  30% { transform: scaleY(0.4) scaleX(0.8); opacity: 0.5; filter: brightness(2) blur(4px); }
+  60% { transform: scaleY(0.9) scaleX(0.95); opacity: 0.85; filter: brightness(1.3) blur(1px); }
+  80% { transform: scaleY(1.02) scaleX(1.01); opacity: 0.95; filter: brightness(1.1) blur(0px); }
+  100% { transform: scaleY(1) scaleX(1); opacity: var(--holo-flicker-opacity); filter: brightness(1) blur(0px); }
+}
+
+@keyframes holo-lip-sync {
+  0%, 100% { clip-path: ellipse(50% 14% at 50% 72%); }
+  15% { clip-path: ellipse(50% 18% at 50% 72%); }
+  30% { clip-path: ellipse(48% 12% at 50% 72%); }
+  45% { clip-path: ellipse(52% 20% at 50% 72%); }
+  60% { clip-path: ellipse(49% 15% at 50% 72%); }
+  75% { clip-path: ellipse(51% 19% at 50% 72%); }
+  90% { clip-path: ellipse(50% 13% at 50% 72%); }
+}
+
+@keyframes holo-particle-float {
+  0% { transform: translateY(0) translateX(0) scale(0); opacity: 0; }
+  20% { transform: translateY(-10px) translateX(5px) scale(1); opacity: 0.8; }
+  80% { transform: translateY(-40px) translateX(-3px) scale(0.6); opacity: 0.4; }
+  100% { transform: translateY(-60px) translateX(2px) scale(0); opacity: 0; }
+}
+
+@keyframes holo-ring-spin {
+  0% { transform: rotateX(70deg) rotateZ(0deg); }
+  100% { transform: rotateX(70deg) rotateZ(360deg); }
+}
+
+@keyframes holo-data-stream {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 -200px; }
+}
+
+.holo-container {
+  position: relative;
+  perspective: 800px;
+}
+
+.holo-figure {
+  position: relative;
+  animation: holo-breathe 5s ease-in-out infinite, holo-flicker 8s steps(1) infinite;
+  transform-origin: center bottom;
+}
+
+.holo-figure.projecting {
+  animation: holo-project-in 1.8s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.holo-scanlines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    var(--holo-scanline-color) 2px,
+    var(--holo-scanline-color) 4px
+  );
+  background-size: 100% 4px;
+  animation: holo-scanlines 4s linear infinite;
+  pointer-events: none;
+  border-radius: inherit;
+  mix-blend-mode: overlay;
+}
+
+.holo-glow {
+  box-shadow: var(--holo-glow);
+  border: 1px solid hsl(var(--holo-primary) / 0.3);
+}
+
+.holo-lip-overlay {
+  position: absolute;
+  inset: 0;
+  background: hsl(var(--holo-primary) / 0.15);
+  animation: holo-lip-sync 0.4s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.holo-ring {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  left: -10%;
+  top: -10%;
+  border: 1px solid hsl(var(--holo-primary) / 0.15);
+  border-radius: 50%;
+  animation: holo-ring-spin 12s linear infinite;
+  pointer-events: none;
+}
+
+.holo-particle {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: hsl(var(--holo-primary));
+  border-radius: 50%;
+  animation: holo-particle-float 3s ease-in-out infinite;
+  pointer-events: none;
+  box-shadow: 0 0 6px hsl(var(--holo-primary) / 0.6);
+}
+
+.holo-data-stream {
+  position: absolute;
+  width: 1px;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    hsl(var(--holo-primary) / 0.3) 4px,
+    transparent 8px
+  );
+  animation: holo-data-stream 2s linear infinite;
+  pointer-events: none;
+}
+
+.holo-subtitle-bar {
+  background: linear-gradient(135deg, hsl(220 25% 8% / 0.9), hsl(220 25% 12% / 0.85));
+  backdrop-filter: blur(12px);
+  border: 1px solid hsl(var(--holo-primary) / 0.2);
+  box-shadow: 0 0 20px hsl(var(--holo-primary) / 0.1), inset 0 1px 0 hsl(var(--holo-primary) / 0.1);
+}
+
+.holo-highlight-pulse {
+  animation: status-pulse-normal 2s ease-in-out 3;
+  outline: 2px solid hsl(var(--holo-primary) / 0.4);
+  outline-offset: 4px;
+  border-radius: inherit;
+}
