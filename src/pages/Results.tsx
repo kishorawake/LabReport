@@ -1,0 +1,206 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Activity, ArrowLeft, Download, Shield, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import type { AnalysisResult } from "@/services/labAnalyzer";
+import Disclaimer from "@/components/Disclaimer";
+import HealthScoreCard from "@/components/HealthScoreCard";
+import OverallSummary from "@/components/OverallSummary";
+import TestPanelCard from "@/components/TestPanelCard";
+import AbnormalFindings from "@/components/AbnormalFindings";
+import AdviceSection from "@/components/AdviceSection";
+import PrivacyBadges from "@/components/PrivacyBadges";
+import AIAvatarGuide from "@/components/AIAvatarGuide";
+
+const stagger = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.12 },
+  },
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 24 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } },
+};
+
+const Results = () => {
+  const navigate = useNavigate();
+  const [results, setResults] = useState<AnalysisResult | null>(null);
+
+  useEffect(() => {
+    const stored = sessionStorage.getItem("labResults");
+    if (stored) {
+      try {
+        setResults(JSON.parse(stored));
+      } catch {
+        navigate("/");
+      }
+    } else {
+      navigate("/");
+    }
+  }, [navigate]);
+
+  if (!results) return null;
+
+  const optimalCount = results.tests.filter((t) => t.status === "normal").length;
+  const attentionCount = results.tests.filter((t) => t.status === "slightly_low" || t.status === "slightly_high").length;
+  const criticalCount = results.tests.filter((t) => t.status === "critical_low" || t.status === "critical_high").length;
+
+  return (
+    <div className="min-h-screen animated-bg relative overflow-hidden">
+      {/* Ambient background blobs */}
+      <div className="fixed inset-0 pointer-events-none -z-10">
+        <div className="absolute top-20 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-blob" />
+        <div className="absolute bottom-40 left-1/4 w-80 h-80 bg-accent/5 rounded-full blur-3xl animate-blob" style={{ animationDelay: "4s" }} />
+      </div>
+
+      {/* Header */}
+      <header className="border-b border-border/50 glass-card sticky top-0 z-50">
+        <div className="container max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-2.5"
+          >
+            <div className="w-9 h-9 rounded-xl hero-gradient flex items-center justify-center shadow-hero">
+              <Activity className="w-5 h-5 text-primary-foreground" />
+            </div>
+            <span className="font-display font-bold text-foreground text-lg">AI Lab Analyzer</span>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="flex items-center gap-1.5 text-xs text-muted-foreground"
+          >
+            <Shield className="w-3.5 h-3.5" />
+            HIPAA-Aligned
+          </motion.div>
+        </div>
+      </header>
+
+      <main className="container max-w-7xl mx-auto px-4 py-8">
+        {/* Back + Title */}
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between mb-6"
+        >
+          <div>
+            <button
+              onClick={() => navigate("/")}
+              className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-2 group"
+            >
+              <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" /> Back
+            </button>
+            <h1 className="font-display text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
+              Your Lab Report Analysis
+              <Sparkles className="w-5 h-5 text-primary" />
+            </h1>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => window.print()}
+            className="hidden md:flex items-center gap-2 hover:shadow-card transition-shadow"
+          >
+            <Download className="w-4 h-4" />
+            Print Report
+          </Button>
+        </motion.div>
+
+        {/* Two-column layout: Avatar left + Content right */}
+        <div className="flex gap-6">
+          {/* Left Column - AI Avatar (hidden on mobile) */}
+          <div className="hidden lg:block w-72 flex-shrink-0">
+            <AIAvatarGuide results={results} />
+          </div>
+
+          {/* Right Column - Main Content */}
+          <motion.div
+            variants={stagger}
+            initial="hidden"
+            animate="show"
+            className="flex-1 min-w-0 space-y-6"
+          >
+            {/* Mobile Avatar */}
+            <div className="lg:hidden">
+              <AIAvatarGuide results={results} />
+            </div>
+
+            {/* Disclaimer */}
+            <motion.div variants={fadeUp}>
+              <Disclaimer />
+            </motion.div>
+
+            {/* Score + Summary Row */}
+            <motion.div variants={fadeUp} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <HealthScoreCard
+                score={results.healthScore}
+                grade={results.healthGrade}
+                optimal={optimalCount}
+                attention={attentionCount}
+                critical={criticalCount}
+              />
+              <OverallSummary
+                totalTests={results.totalTests}
+                normalTests={results.normalTests}
+                abnormalTests={results.abnormalTests}
+                summary={results.overallSummary}
+                panelCount={results.panels.length}
+              />
+            </motion.div>
+
+            {/* Test Panels */}
+            <motion.div variants={fadeUp}>
+              <h2 className="font-display text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
+                <span className="w-1 h-6 rounded-full hero-gradient inline-block" />
+                Test Panels Detected
+              </h2>
+              <div className="space-y-3">
+                {results.panels.map((panel, i) => (
+                  <TestPanelCard key={panel.name} panel={panel} index={i} />
+                ))}
+              </div>
+            </motion.div>
+
+            {/* Abnormal Findings */}
+            <motion.div variants={fadeUp}>
+              <AbnormalFindings findings={results.abnormalFindings} />
+            </motion.div>
+
+            {/* Advice Sections */}
+            <motion.div variants={fadeUp}>
+              <AdviceSection
+                practicalAdvice={results.practicalAdvice}
+                recommendedActions={results.recommendedActions}
+                whenToConsultDoctor={results.whenToConsultDoctor}
+                talkingPoints={results.talkingPoints}
+              />
+            </motion.div>
+
+            {/* Privacy */}
+            <motion.div variants={fadeUp}>
+              <PrivacyBadges />
+            </motion.div>
+
+            {/* Analyze Another */}
+            <motion.div variants={fadeUp} className="panel-card p-8 text-center shimmer">
+              <h3 className="font-display text-lg font-semibold text-foreground mb-2">Lab Report Analysis</h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Want to analyze another report? Upload a new lab report to get instant AI-powered insights.
+              </p>
+              <Button onClick={() => navigate("/")} className="shadow-hero hover:shadow-glow transition-shadow">
+                Analyze Another Report
+              </Button>
+            </motion.div>
+          </motion.div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Results;
